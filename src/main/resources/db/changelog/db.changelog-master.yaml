@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/01-create-users-tables.yaml
+  - include:
+      file: db/changelog/02-create-roles-tables.yaml
+  - include:
+      file: db/changelog/03-create-customers-tables.yaml
