@@ -1,0 +1,71 @@
+databaseChangeLog:
+  - changeSet:
+      id: 10
+      author: system
+      changes:
+        - createTable:
+            tableName: advertisement_response
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: seller_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: advertisement_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: TEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: advertisement_response
+            baseColumnNames: seller_id
+            referencedTableName: sellers
+            referencedColumnNames: id
+            constraintName: fk_adv_response_sellers
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: advertisement_response
+            baseColumnNames: advertisement_id
+            referencedTableName: advertisement
+            referencedColumnNames: id
+            constraintName: fk_adv_response_advertisement
+            onDelete: CASCADE
+  - changeSet:
+      id: 10-1
+      author: system
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: advertisement
+            baseColumnNames: selected_response_id
+            referencedTableName: advertisement_response
+            referencedColumnNames: id
+            constraintName: fk_adv_selected_response
+            onDelete: SET NULL

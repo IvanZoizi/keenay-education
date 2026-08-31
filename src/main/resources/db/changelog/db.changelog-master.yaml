@@ -5,3 +5,27 @@ databaseChangeLog:
       file: db/changelog/02-create-roles-tables.yaml
   - include:
       file: db/changelog/03-create-customers-tables.yaml
+  - include:
+      file: db/changelog/04-create-sellers-tables.yaml
+  - include:
+      file: db/changelog/05-create-animals-tables.yaml
+  - include:
+      file: db/changelog/06-create-pets-tables.yaml
+  - include:
+      file: db/changelog/07-create-pets-profile.yaml
+  - include:
+      file: db/changelog/08-create-skills-tables.yaml
+  - include:
+      file: db/changelog/09-create-advertisement-tables.yaml
+  - include:
+      file: db/changelog/10-create-advertisement-response.yaml
+  - include:
+      file: db/changelog/11-create-chat-tables.yaml
+  - include:
+      file: db/changelog/12-create-tasks-tables.yaml
+  - include:
+      file: db/changelog/13-create-tickets-tables.yaml
+  - include:
+      file: db/changelog/14-create-reviews-tables.yaml
+  - include:
+      file: db/changelog/15-insert-initial-data.yaml

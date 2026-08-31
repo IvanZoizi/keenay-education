@@ -1,0 +1,48 @@
+
+databaseChangeLog:
+  - changeSet:
+      id: 14
+      author: system
+      changes:
+        - createTable:
+            tableName: reviews
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: advertisement_id
+                  type: BIGINT
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: score
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: TEXT
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: moderated_at
+                  type: TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: reviews
+            baseColumnNames: advertisement_id
+            referencedTableName: advertisement
+            referencedColumnNames: id
+            constraintName: fk_reviews_advertisement
+            onDelete: CASCADE
