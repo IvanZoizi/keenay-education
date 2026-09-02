@@ -42,12 +42,20 @@ public class UserServiceImpl implements UserService {
     private Users createUser(String email, String password, List<Roles> roles) {
         Users user = new Users();
         user.setEmail(email);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(password));
         user.setRoles(roles);
         return userRepository.save(user);
     }
 
-    private Customers createCustomers(String name, String surname, Users user) {
+    private Customers createCustomers(String name, String surname, Users user) throws AuthenticationException {
+
+        if (user.getBannedAt() != null) {
+            throw new AuthenticationException("The user has been banned.");
+        }
+        if (user.getDeletedAt() != null) {
+            throw new AuthenticationException("The user has been deleted.");
+        }
+
         Customers customers = new Customers();
         customers.setName(name);
         customers.setSurname(surname);
@@ -55,7 +63,15 @@ public class UserServiceImpl implements UserService {
         return customersRepository.save(customers);
     }
 
-    private Sellers createSellers(String name, String surname, String address, String inn, String description, Users user) {
+    private Sellers createSellers(String name, String surname, String address, String inn, String description, Users user) throws AuthenticationException {
+
+        if (user.getBannedAt() != null) {
+            throw new AuthenticationException("The user has been banned.");
+        }
+        if (user.getDeletedAt() != null) {
+            throw new AuthenticationException("The user has been deleted.");
+        }
+
         Sellers seller = new Sellers();
         seller.setName(name);
         seller.setSurname(surname);
@@ -86,7 +102,7 @@ public class UserServiceImpl implements UserService {
                 throw new AuthenticationException("The role has already been added");
             }
             rolesList.add(adminRole);
-            currentUser.setRoles(List.of(adminRole));
+            currentUser.setRoles(rolesList);
             userRepository.save(currentUser);
         }
         return "success";
@@ -116,7 +132,7 @@ public class UserServiceImpl implements UserService {
                 throw new AuthenticationException("The role has already been added");
             }
             rolesList.add(customerRole);
-            currentUser.setRoles(List.of(customerRole));
+            currentUser.setRoles(rolesList);
             this.createCustomers(
                     registerCustomerDTO.getName(),
                     registerCustomerDTO.getSurname(),
@@ -129,7 +145,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String registerSeller(RegisterSellerDTO registerSellerDTO) throws AuthenticationException {
         Optional<Users> usersOptional = userRepository.findByEmail(registerSellerDTO.getEmail());
-        Roles sellerRole = rolesRepository.findByRole("customer").orElseThrow(() -> new InternalException("Role not found"));
+        Roles sellerRole = rolesRepository.findByRole("seller").orElseThrow(() -> new InternalException("Role not found"));
         if (usersOptional.isEmpty()) {
             Users user = this.createUser(registerSellerDTO.getEmail(),
                     registerSellerDTO.getPassword(),
@@ -153,7 +169,7 @@ public class UserServiceImpl implements UserService {
                 throw new AuthenticationException("The role has already been added");
             }
             rolesList.add(sellerRole);
-            currentUser.setRoles(List.of(sellerRole));
+            currentUser.setRoles(rolesList);
             this.createSellers(
                     registerSellerDTO.getName(),
                     registerSellerDTO.getSurname(),
@@ -174,6 +190,14 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
             throw new AuthenticationException("Invalid password.");
         }
+
+        if (user.getBannedAt() != null) {
+            throw new AuthenticationException("The user has been banned.");
+        }
+        if (user.getDeletedAt() != null) {
+            throw new AuthenticationException("The user has been deleted.");
+        }
+
 
         return jwtService.generateAuthToken(user.getEmail());
     }
