@@ -40,6 +40,6 @@ public class Pets {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @OneToOne(mappedBy = "pet", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "pet", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private PetsProfile petsProfile;
 }

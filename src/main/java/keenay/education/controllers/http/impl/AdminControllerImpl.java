@@ -29,7 +29,6 @@ public class AdminControllerImpl implements AdminController {
 
     @Override
     @GetMapping("/animal")
-    @PreAuthorize("hasAnyRole('ROLE_admin')")
     public ResponseEntity<List<AnimalDTO>> getAnimals() {
         return ResponseEntity.ok(animalService.getAnimals());
     }

@@ -1,11 +1,10 @@
 package keenay.education.mapper;
 
 import keenay.education.dto.animal.AnimalDTO;
+import keenay.education.dto.pets.PetsDTO;
 import keenay.education.dto.support.TicketDTO;
 import keenay.education.dto.support.TicketWithAnswerDTO;
-import keenay.education.entity.Animals;
-import keenay.education.entity.Ticket;
-import keenay.education.entity.TicketReplies;
+import keenay.education.entity.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -27,14 +26,24 @@ public interface MapperService {
     })
     TicketDTO getTicketDTO(Ticket ticket);
 
+    @Mappings({
+            @Mapping(source = "name", target = "name")
+    })
+    AnimalDTO getAnimal(Animals animal);
+
+    @Mappings({
+            @Mapping(source = "pet.id", target="id"),
+            @Mapping(source = "pet.name", target = "namePet"),
+            @Mapping(source = "pet.animal.name", target = "nameAnimal"),
+            @Mapping(source = "pet.petsProfile.breed", target = "breed"),
+            @Mapping(source = "pet.petsProfile.features", target = "features"),
+            @Mapping(source = "pet.petsProfile.vaccinations", target = "vaccinations")
+    })
+    PetsDTO getPets(Pets pet);
+
     default String getAnswer(Ticket ticket) {
         return ticket.getTicketReplies() != null
                 ? ticket.getTicketReplies().getAnswer()
                 : "";
     }
-
-    @Mappings({
-            @Mapping(source = "name", target = "name")
-    })
-    AnimalDTO getAnimal(Animals animal);
 }
