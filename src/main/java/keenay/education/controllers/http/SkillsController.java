@@ -2,10 +2,9 @@ package keenay.education.controllers.http;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
-import keenay.education.dto.pets.PetsBodyDTO;
-import keenay.education.dto.pets.PetsDTO;
-import keenay.education.dto.pets.PetsPutBodyDTO;
+import keenay.education.dto.skills.SkillsBodyDTO;
+import keenay.education.dto.skills.SkillsDTO;
+import keenay.education.dto.skills.SkillsPutBodyDTO;
 import keenay.education.security.CustomUserDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,27 +14,27 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@Tag(name = "Pets Endpoints")
-@RequestMapping("/api/v1/pets")
-public interface PetsController {
-    ResponseEntity<PetsDTO> createPets(
+@Tag(name = "Skills Endpoints")
+@RequestMapping("/api/v1/skills")
+public interface SkillsController {
+    ResponseEntity<SkillsDTO> createSkillForUser(
             @AuthenticationPrincipal CustomUserDetail userDetail,
-            @Valid @RequestBody PetsBodyDTO petsBodyDTO
+            @Valid @RequestBody SkillsBodyDTO skillsBodyDTO
     );
-    ResponseEntity<List<PetsDTO>> getListPets(
+    ResponseEntity<List<SkillsDTO>> getSkills(
             @AuthenticationPrincipal CustomUserDetail userDetail
     );
-    ResponseEntity<PetsDTO> getPet(
+    ResponseEntity<SkillsDTO> getSkill(
             @AuthenticationPrincipal CustomUserDetail userDetail,
             @PathVariable("id") Long id
     );
-    ResponseEntity<PetsDTO> updatePet(
+    ResponseEntity<SkillsDTO> updateSkill(
             @AuthenticationPrincipal CustomUserDetail userDetail,
-            @PathVariable ("id") Long id,
-            @Valid @RequestBody PetsPutBodyDTO petsBodyDTO
+            @PathVariable("id") Long id,
+            @Valid @RequestBody SkillsPutBodyDTO skillsPutBodyDTO
     );
-    ResponseEntity<Void> deletePet(
+    ResponseEntity<Void> deleteSkill(
             @AuthenticationPrincipal CustomUserDetail userDetail,
-            @PathVariable ("id") Long id
+            @PathVariable("id") Long id
     );
 }

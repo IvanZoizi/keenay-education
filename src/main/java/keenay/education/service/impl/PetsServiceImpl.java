@@ -2,6 +2,7 @@ package keenay.education.service.impl;
 
 import keenay.education.dto.pets.PetsBodyDTO;
 import keenay.education.dto.pets.PetsDTO;
+import keenay.education.dto.pets.PetsPutBodyDTO;
 import keenay.education.entity.Animals;
 import keenay.education.entity.Customers;
 import keenay.education.entity.Pets;
@@ -19,22 +20,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PetsProfileImpl implements PetsService {
+public class PetsServiceImpl implements PetsService {
 
     private final PetsRepository petsRepository;
     private final PetsProfileRepository petsProfileRepository;
     private final AnimalsRepository animalsRepository;
     private final MapperService mapperService;
-
-    private final UserRepository userRepository;
 
     private Pets createPets(Pets pets, PetsBodyDTO petsBodyDTO, Customers customer, Animals animal) {
         pets.setAnimal(animal);
@@ -74,22 +71,25 @@ public class PetsProfileImpl implements PetsService {
     public PetsDTO getPet(CustomUserDetail userDetail, Long id) {
         Pets pet = petsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("The pet was not found."));
-        if (!pet.getCustomer().getId().equals(userDetail.getUser().getId())) {
+        if (!pet.getCustomer().getUser().getId().equals(userDetail.getUser().getId())) {
             throw new AccessDeniedException("You cannot obtain information about this pet.");
         }
         return mapperService.getPets(pet);
     }
 
     @Override
-    public PetsDTO updatePet(CustomUserDetail userDetail, Long id, PetsBodyDTO petsBodyDTO) {
+    public PetsDTO updatePet(CustomUserDetail userDetail, Long id, PetsPutBodyDTO petsBodyDTO) {
         Pets pet = petsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("The pet was not found."));
-        if (!pet.getCustomer().getId().equals(userDetail.getUser().getId())) {
+        if (!pet.getCustomer().getUser().getId().equals(userDetail.getUser().getId())) {
             throw new AccessDeniedException("You cannot obtain information about this pet.");
         }
-        pet = createPets(pet, petsBodyDTO, userDetail.getUser().getCustomer(), pet.getAnimal());
-        createPetsProfile(pet.getPetsProfile(), petsBodyDTO, pet);
-        pet.setPetsProfile(createPetsProfile(new PetsProfile(), petsBodyDTO, pet));
+        PetsProfile petsProfile = pet.getPetsProfile();
+        petsProfile.setVaccinations(petsBodyDTO.getVaccinations());
+        petsProfile.setFeatures(petsBodyDTO.getFeatures());
+        petsProfile.setBreed(petsBodyDTO.getBreed());
+        petsProfileRepository.save(petsProfile);
+        pet.setPetsProfile(petsProfile);
         return mapperService.getPets(pet);
     }
 
@@ -97,7 +97,7 @@ public class PetsProfileImpl implements PetsService {
     public void deletePet(CustomUserDetail userDetail, Long id) {
         Pets pet = petsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("The pet was not found."));
-        if (!pet.getCustomer().getId().equals(userDetail.getUser().getId())) {
+        if (!pet.getCustomer().getUser().getId().equals(userDetail.getUser().getId())) {
             throw new AccessDeniedException("You cannot obtain information about this pet.");
         }
         petsRepository.delete(pet);

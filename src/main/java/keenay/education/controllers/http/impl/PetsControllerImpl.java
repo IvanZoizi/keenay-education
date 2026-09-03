@@ -5,6 +5,7 @@ import jakarta.websocket.server.PathParam;
 import keenay.education.controllers.http.PetsController;
 import keenay.education.dto.pets.PetsBodyDTO;
 import keenay.education.dto.pets.PetsDTO;
+import keenay.education.dto.pets.PetsPutBodyDTO;
 import keenay.education.security.CustomUserDetail;
 import keenay.education.service.PetsService;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,7 @@ public class PetsControllerImpl implements PetsController {
     public ResponseEntity<PetsDTO> updatePet(
             @AuthenticationPrincipal CustomUserDetail userDetail,
             @PathVariable ("id") Long id,
-            @Valid @RequestBody PetsBodyDTO petsBodyDTO) {
+            @Valid @RequestBody PetsPutBodyDTO petsBodyDTO) {
         return ResponseEntity.ok(petsService.updatePet(userDetail, id, petsBodyDTO));
     }
 

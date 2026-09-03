@@ -25,11 +25,11 @@ public interface SupportController {
     );
     ResponseEntity<TicketWithAnswerDTO> getTicketInfo(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
-            @PathParam("id")Long id
+            @PathVariable("id")Long id
     );
     ResponseEntity<TicketWithAnswerDTO> answerForTicket(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
-            @PathParam("id") Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody TicketAnswerBodyDTO ticketAnswerBodyDTO
     );
     ResponseEntity<List<TicketDTO>> getAvailableTicket();

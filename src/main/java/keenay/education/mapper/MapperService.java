@@ -2,6 +2,7 @@ package keenay.education.mapper;
 
 import keenay.education.dto.animal.AnimalDTO;
 import keenay.education.dto.pets.PetsDTO;
+import keenay.education.dto.skills.SkillsDTO;
 import keenay.education.dto.support.TicketDTO;
 import keenay.education.dto.support.TicketWithAnswerDTO;
 import keenay.education.entity.*;
@@ -40,6 +41,14 @@ public interface MapperService {
             @Mapping(source = "pet.petsProfile.vaccinations", target = "vaccinations")
     })
     PetsDTO getPets(Pets pet);
+
+    @Mappings({
+            @Mapping(source = "skill.id", target="id"),
+            @Mapping(source = "skill.title", target = "title"),
+            @Mapping(source = "skill.description", target = "description"),
+            @Mapping(source = "skill.animal.name", target = "animal")
+    })
+    SkillsDTO getSkill(Skills skill);
 
     default String getAnswer(Ticket ticket) {
         return ticket.getTicketReplies() != null
