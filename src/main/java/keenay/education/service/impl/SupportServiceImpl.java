@@ -8,6 +8,7 @@ import keenay.education.entity.Ticket;
 import keenay.education.entity.TicketReplies;
 import keenay.education.exception.errors.AccessDeniedException;
 import keenay.education.exception.errors.EntityNotFoundException;
+import keenay.education.exception.errors.TicketHasNotBeenCreatedException;
 import keenay.education.mapper.MapperService;
 import keenay.education.repository.TicketRepliesRepository;
 import keenay.education.repository.TicketRepository;
@@ -43,7 +44,7 @@ public class SupportServiceImpl implements SupportService {
     @Override
     public TicketWithAnswerDTO getTicketInfo(CustomUserDetail customUserDetail, Long id) {
         Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("The ticket was not found."));
+                .orElseThrow(() -> new TicketHasNotBeenCreatedException("The ticket was not found."));
         if (!Objects.equals(ticket.getSender().getId(), customUserDetail.getUser().getId())) {
             throw new AccessDeniedException("You cannot get information about this ticket.");
         }
@@ -53,7 +54,7 @@ public class SupportServiceImpl implements SupportService {
     @Override
     public TicketWithAnswerDTO answerForTicket(CustomUserDetail customUserDetail, Long id, TicketAnswerBodyDTO ticketAnswerBodyDTO) {
         Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("The ticket was not found."));
+                .orElseThrow(() -> new TicketHasNotBeenCreatedException("The ticket was not found."));
         TicketReplies ticketReplies = new TicketReplies();
         ticketReplies.setAnswer(ticketAnswerBodyDTO.getAnswer());
         ticketReplies.setTicket(ticket);

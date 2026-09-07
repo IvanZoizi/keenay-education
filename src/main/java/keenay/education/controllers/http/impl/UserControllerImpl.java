@@ -7,7 +7,6 @@ import keenay.education.dto.auth.RegisterAdminDTO;
 import keenay.education.dto.auth.RegisterCustomerDTO;
 import keenay.education.dto.auth.RegisterSellerDTO;
 import keenay.education.dto.security.JwtAutorizeToken;
-import keenay.education.repository.UserRepository;
 import keenay.education.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

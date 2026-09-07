@@ -8,6 +8,7 @@ import keenay.education.entity.Customers;
 import keenay.education.entity.Pets;
 import keenay.education.entity.PetsProfile;
 import keenay.education.exception.errors.AccessDeniedException;
+import keenay.education.exception.errors.AnimalIsNotSupported;
 import keenay.education.exception.errors.EntityNotFoundException;
 import keenay.education.mapper.MapperService;
 import keenay.education.repository.AnimalsRepository;
@@ -53,7 +54,7 @@ public class PetsServiceImpl implements PetsService {
     public PetsDTO createPets(CustomUserDetail userDetail, PetsBodyDTO petsBodyDTO) {
         Customers customers = userDetail.getUser().getCustomer();
         Animals animal = animalsRepository.findByName(petsBodyDTO.getNameAnimal())
-                .orElseThrow(() -> new EntityNotFoundException("This animal is not handled in our service."));
+                .orElseThrow(() -> new AnimalIsNotSupported("This animal is not handled in our service."));
         Pets pets = new Pets();
         pets = createPets(pets, petsBodyDTO, customers, animal);
         pets.setPetsProfile(createPetsProfile(new PetsProfile(), petsBodyDTO, pets));

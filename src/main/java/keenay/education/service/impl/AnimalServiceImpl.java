@@ -3,6 +3,7 @@ package keenay.education.service.impl;
 import keenay.education.dto.animal.AnimalBodyDTO;
 import keenay.education.dto.animal.AnimalDTO;
 import keenay.education.entity.Animals;
+import keenay.education.exception.errors.AnimalIsNotSupported;
 import keenay.education.exception.errors.EntityNotFoundException;
 import keenay.education.mapper.MapperService;
 import keenay.education.repository.AnimalsRepository;
@@ -40,7 +41,7 @@ public class AnimalServiceImpl implements AnimalService {
     @Override
     public void deleteAnimal(AnimalBodyDTO animalDTO) {
         Animals animal = animalsRepository.findByName(animalDTO.getName())
-                .orElseThrow(() -> new EntityNotFoundException("No animal with the given name was found."));
+                .orElseThrow(() -> new AnimalIsNotSupported("No animal with the given name was found."));
         animalsRepository.delete(animal);
     }
 }

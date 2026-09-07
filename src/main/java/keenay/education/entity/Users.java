@@ -59,5 +59,8 @@ public class Users {
 
     @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
     private List<Chat> chatsByCustomer = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<EmailsUser> emails = new ArrayList<>();
 }
 

@@ -17,9 +17,40 @@ spring:
     default-schema: public
   security:
     key: 8074658237c236e39e96e909ac1abb25a3e1773b100096ad6877c439cd452c17
+  rabbitmq:
+    username: admin
+    password: admin
+    host: localhost
+    port: 5672
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: seaoffriendsforyou@gmail.com
+    password: nzzaltcjgbzgfwyr
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: "*"
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+    default-encoding: UTF-8
 
 server:
   port: 8080
+
+rabbitmq:
+  queue:
+    name: email-send
+    name-retry: email-retry
+    name-exception: email-exception
+    retry-attempt: 5
+
 
 logging:
   level:

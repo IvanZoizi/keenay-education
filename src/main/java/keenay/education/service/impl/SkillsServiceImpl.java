@@ -7,7 +7,9 @@ import keenay.education.entity.Animals;
 import keenay.education.entity.Sellers;
 import keenay.education.entity.Skills;
 import keenay.education.exception.errors.AccessDeniedException;
+import keenay.education.exception.errors.AnimalIsNotSupported;
 import keenay.education.exception.errors.EntityNotFoundException;
+import keenay.education.exception.errors.SkillNotFoundException;
 import keenay.education.mapper.MapperService;
 import keenay.education.repository.AnimalsRepository;
 import keenay.education.repository.SkillsRepository;
@@ -31,7 +33,7 @@ public class SkillsServiceImpl implements SkillsService {
     @Override
     public SkillsDTO createSkillForUser(CustomUserDetail userDetail, SkillsBodyDTO skillsBodyDTO) {
         Animals animal = animalsRepository.findByName(skillsBodyDTO.getAnimal())
-                .orElseThrow(() -> new EntityNotFoundException("This animal is not handled in our service."));
+                .orElseThrow(() -> new AnimalIsNotSupported("This animal is not handled in our service."));
         Skills skill = new Skills();
         skill.setTitle(skillsBodyDTO.getTitle());
         skill.setDescription(skillsBodyDTO.getDescription());
@@ -50,7 +52,7 @@ public class SkillsServiceImpl implements SkillsService {
     @Override
     public SkillsDTO getSkill(CustomUserDetail userDetail, Long id) {
         Skills skill = skillsRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("This skill has not been found."));
+                .orElseThrow(() -> new SkillNotFoundException("This skill has not been found."));
         if (!skill.getSeller().getUser().getId().equals(userDetail.getUser().getId())) {
             throw new AccessDeniedException("You cannot obtain information about this pet.");
         }

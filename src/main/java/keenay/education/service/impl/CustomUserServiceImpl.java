@@ -1,6 +1,7 @@
 package keenay.education.service.impl;
 
 import keenay.education.entity.Users;
+import keenay.education.exception.errors.AuthorizationException;
 import keenay.education.exception.errors.EntityNotFoundException;
 import keenay.education.repository.UserRepository;
 import keenay.education.security.CustomUserDetail;
@@ -15,7 +16,7 @@ public class CustomUserServiceImpl {
 
     public CustomUserDetail getUserByEmail(String email) {
         Users user = usersRepository.findByEmailWithRoles(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new AuthorizationException("User not found"));
 
         return new CustomUserDetail(user);
     }

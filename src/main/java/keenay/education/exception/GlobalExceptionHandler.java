@@ -1,6 +1,6 @@
 package keenay.education.exception;
 
-import keenay.education.exception.errors.EntityNotFoundException;
+import keenay.education.exception.errors.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +29,43 @@ public class GlobalExceptionHandler {
 
         return body;
     }
+
+    @ExceptionHandler(AnimalIsNotSupported.class)
+    public ResponseEntity<Object> handleAnimalIsNotSupportedException(AnimalIsNotSupported ex) {
+        Map<String, Object> body = createMessage(ex);
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(SkillNotFoundException.class)
+    public ResponseEntity<Object> handleSkillNotFoundException(SkillNotFoundException ex) {
+        Map<String, Object> body = createMessage(ex);
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TicketHasNotBeenCreatedException.class)
+    public ResponseEntity<Object> handleTicketHasNotBeenCreatedException(TicketHasNotBeenCreatedException ex) {
+        Map<String, Object> body = createMessage(ex);
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<Object> handleAuthorizationExceptionException(AuthorizationException ex) {
+        Map<String, Object> body = createMessage(ex);
+        return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InternalException.class)
+    public ResponseEntity<Object> handleInternalException(InternalException ex) {
+        Map<String, Object> body = createMessage(ex);
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(NoMailFoundException.class)
+    public ResponseEntity<Object> handleNoMailFoundException(NoMailFoundException ex) {
+        Map<String, Object> body = createMessage(ex);
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {

@@ -16,6 +16,7 @@ import keenay.education.repository.SellersRepository;
 import keenay.education.repository.UserRepository;
 import keenay.education.security.jwt.JwtService;
 import keenay.education.service.UserService;
+import keenay.education.service.email.EmailCreateApplicationService;
 import keenay.education.utils.UtilsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final SellersRepository sellersRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final EmailCreateApplicationService emailCreateApplicationService;
 
     private Users createUser(String email, String password, List<Roles> roles) {
         Users user = new Users();
@@ -197,8 +199,7 @@ public class UserServiceImpl implements UserService {
         if (user.getDeletedAt() != null) {
             throw new AuthenticationException("The user has been deleted.");
         }
-
-
+        emailCreateApplicationService.sendEmailFor(user, "Привет, ты вошел в аккаунт", "Вход");
         return jwtService.generateAuthToken(user.getEmail());
     }
 }
