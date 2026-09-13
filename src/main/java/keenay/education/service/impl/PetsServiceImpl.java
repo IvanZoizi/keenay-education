@@ -10,11 +10,11 @@ import keenay.education.entity.PetsProfile;
 import keenay.education.exception.errors.AccessDeniedException;
 import keenay.education.exception.errors.AnimalIsNotSupported;
 import keenay.education.exception.errors.EntityNotFoundException;
-import keenay.education.mapper.MapperService;
+import keenay.education.exception.errors.PetsNotFoundException;
+import keenay.education.mapper.pets.PetsMapper;
 import keenay.education.repository.AnimalsRepository;
 import keenay.education.repository.PetsProfileRepository;
 import keenay.education.repository.PetsRepository;
-import keenay.education.repository.UserRepository;
 import keenay.education.security.CustomUserDetail;
 import keenay.education.service.PetsService;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class PetsServiceImpl implements PetsService {
     private final PetsRepository petsRepository;
     private final PetsProfileRepository petsProfileRepository;
     private final AnimalsRepository animalsRepository;
-    private final MapperService mapperService;
+    private final PetsMapper mapperService;
 
     private Pets createPets(Pets pets, PetsBodyDTO petsBodyDTO, Customers customer, Animals animal) {
         pets.setAnimal(animal);
@@ -70,37 +70,32 @@ public class PetsServiceImpl implements PetsService {
 
     @Override
     public PetsDTO getPet(CustomUserDetail userDetail, Long id) {
-        Pets pet = petsRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("The pet was not found."));
-        if (!pet.getCustomer().getUser().getId().equals(userDetail.getUser().getId())) {
-            throw new AccessDeniedException("You cannot obtain information about this pet.");
-        }
+        Pets pet = petsRepository.findByIdAndUserId(id, userDetail.getUser().getId())
+                .orElseThrow(() -> new AccessDeniedException("You cannot obtain information about this pet."));
         return mapperService.getPets(pet);
     }
 
     @Override
     public PetsDTO updatePet(CustomUserDetail userDetail, Long id, PetsPutBodyDTO petsBodyDTO) {
-        Pets pet = petsRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("The pet was not found."));
-        if (!pet.getCustomer().getUser().getId().equals(userDetail.getUser().getId())) {
-            throw new AccessDeniedException("You cannot obtain information about this pet.");
+        Pets pet = petsRepository.findByIdAndUserId(id, userDetail.getUser().getId())
+                .orElseThrow(() -> new AccessDeniedException("You cannot obtain information about this pet."));
+        List<PetsProfile> petsProfile = petsProfileRepository.update(
+                id,
+                userDetail.getUser().getCustomer().getId(),
+                petsBodyDTO.getBreed(),
+                petsBodyDTO.getFeatures(),
+                petsBodyDTO.getVaccinations()
+        );
+        if (petsProfile.isEmpty()) {
+            throw new PetsNotFoundException("The pet was not found.");
         }
-        PetsProfile petsProfile = pet.getPetsProfile();
-        petsProfile.setVaccinations(petsBodyDTO.getVaccinations());
-        petsProfile.setFeatures(petsBodyDTO.getFeatures());
-        petsProfile.setBreed(petsBodyDTO.getBreed());
-        petsProfileRepository.save(petsProfile);
-        pet.setPetsProfile(petsProfile);
+        pet.setPetsProfile(petsProfile.get(0));
         return mapperService.getPets(pet);
     }
 
     @Override
     public void deletePet(CustomUserDetail userDetail, Long id) {
-        Pets pet = petsRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("The pet was not found."));
-        if (!pet.getCustomer().getUser().getId().equals(userDetail.getUser().getId())) {
-            throw new AccessDeniedException("You cannot obtain information about this pet.");
-        }
-        petsRepository.delete(pet);
+        petsRepository.deleteByIdAndCustomer(id, userDetail.getUser().getId())
+                .orElseThrow(() -> new AccessDeniedException("This pet does not belong to you."));
     }
 }

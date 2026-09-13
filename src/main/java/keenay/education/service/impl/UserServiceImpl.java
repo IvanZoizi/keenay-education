@@ -50,14 +50,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private Customers createCustomers(String name, String surname, Users user) throws AuthenticationException {
-
-        if (user.getBannedAt() != null) {
-            throw new AuthenticationException("The user has been banned.");
-        }
-        if (user.getDeletedAt() != null) {
-            throw new AuthenticationException("The user has been deleted.");
-        }
-
         Customers customers = new Customers();
         customers.setName(name);
         customers.setSurname(surname);
@@ -66,14 +58,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private Sellers createSellers(String name, String surname, String address, String inn, String description, Users user) throws AuthenticationException {
-
-        if (user.getBannedAt() != null) {
-            throw new AuthenticationException("The user has been banned.");
-        }
-        if (user.getDeletedAt() != null) {
-            throw new AuthenticationException("The user has been deleted.");
-        }
-
         Sellers seller = new Sellers();
         seller.setName(name);
         seller.setSurname(surname);
@@ -188,11 +172,15 @@ public class UserServiceImpl implements UserService {
     public JwtAutorizeToken singIn(LoginDTO loginDTO) throws AuthenticationException {
         Users user = userRepository.findByEmail(loginDTO.getEmail())
                 .orElseThrow(() -> new AuthenticationException("The user with this ID was not found."));
-
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
             throw new AuthenticationException("Invalid password.");
         }
-
+        if (user.getBannedAt() != null) {
+            throw new AuthenticationException("The user has been banned.");
+        }
+        if (user.getDeletedAt() != null) {
+            throw new AuthenticationException("The user has been deleted.");
+        }
         if (user.getBannedAt() != null) {
             throw new AuthenticationException("The user has been banned.");
         }

@@ -52,6 +52,7 @@ public class EmailListenerService {
                 }
             } else {
                 emailDTO.setIsSend(false);
+                emailDTO.setEx(exception);
                 rabbitTemplate.convertAndSend(rabbitMqConfig.EMAIL_EXCHANGE, nameQueueException, emailDTO);
             }
         }

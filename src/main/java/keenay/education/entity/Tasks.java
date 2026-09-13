@@ -27,14 +27,13 @@ public class Tasks {
     private String photoUrl;
 
     @Column(name = "status")
-    private TasksStatus status;
+    private TasksStatus status = TasksStatus.CREATED;
 
     @Column(name = "title")
     private String title;
 
     @Column(name = "description")
     private String description;
-
 
     @Column(name = "created_at")
     @CreationTimestamp

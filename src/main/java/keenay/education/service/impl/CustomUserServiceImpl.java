@@ -17,7 +17,6 @@ public class CustomUserServiceImpl {
     public CustomUserDetail getUserByEmail(String email) {
         Users user = usersRepository.findByEmailWithRoles(email)
                 .orElseThrow(() -> new AuthorizationException("User not found"));
-
         return new CustomUserDetail(user);
     }
 }

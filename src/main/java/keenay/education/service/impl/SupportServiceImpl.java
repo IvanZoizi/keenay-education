@@ -7,9 +7,8 @@ import keenay.education.dto.support.TicketWithAnswerDTO;
 import keenay.education.entity.Ticket;
 import keenay.education.entity.TicketReplies;
 import keenay.education.exception.errors.AccessDeniedException;
-import keenay.education.exception.errors.EntityNotFoundException;
 import keenay.education.exception.errors.TicketHasNotBeenCreatedException;
-import keenay.education.mapper.MapperService;
+import keenay.education.mapper.ticket.TicketMapper;
 import keenay.education.repository.TicketRepliesRepository;
 import keenay.education.repository.TicketRepository;
 import keenay.education.security.CustomUserDetail;
@@ -20,14 +19,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SupportServiceImpl implements SupportService {
 
-    private final MapperService mapperService;
+    private final TicketMapper mapperService;
     private final TicketRepository ticketRepository;
     private final TicketRepliesRepository ticketRepliesRepository;
 
@@ -43,11 +41,8 @@ public class SupportServiceImpl implements SupportService {
 
     @Override
     public TicketWithAnswerDTO getTicketInfo(CustomUserDetail customUserDetail, Long id) {
-        Ticket ticket = ticketRepository.findById(id)
+        Ticket ticket = ticketRepository.findByIdAndSender_Id(id, customUserDetail.getUser().getId())
                 .orElseThrow(() -> new TicketHasNotBeenCreatedException("The ticket was not found."));
-        if (!Objects.equals(ticket.getSender().getId(), customUserDetail.getUser().getId())) {
-            throw new AccessDeniedException("You cannot get information about this ticket.");
-        }
         return mapperService.getTicketWithAnswerDTO(ticket);
     }
 

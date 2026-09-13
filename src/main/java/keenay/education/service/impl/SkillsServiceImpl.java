@@ -4,13 +4,9 @@ import keenay.education.dto.skills.SkillsBodyDTO;
 import keenay.education.dto.skills.SkillsDTO;
 import keenay.education.dto.skills.SkillsPutBodyDTO;
 import keenay.education.entity.Animals;
-import keenay.education.entity.Sellers;
 import keenay.education.entity.Skills;
-import keenay.education.exception.errors.AccessDeniedException;
-import keenay.education.exception.errors.AnimalIsNotSupported;
-import keenay.education.exception.errors.EntityNotFoundException;
-import keenay.education.exception.errors.SkillNotFoundException;
-import keenay.education.mapper.MapperService;
+import keenay.education.exception.errors.*;
+import keenay.education.mapper.skills.SkillMapper;
 import keenay.education.repository.AnimalsRepository;
 import keenay.education.repository.SkillsRepository;
 import keenay.education.security.CustomUserDetail;
@@ -28,7 +24,7 @@ public class SkillsServiceImpl implements SkillsService {
 
     private final SkillsRepository skillsRepository;
     private final AnimalsRepository animalsRepository;
-    private final MapperService mapperService;
+    private final SkillMapper mapperService;
 
     @Override
     public SkillsDTO createSkillForUser(CustomUserDetail userDetail, SkillsBodyDTO skillsBodyDTO) {
@@ -44,41 +40,30 @@ public class SkillsServiceImpl implements SkillsService {
 
     @Override
     public List<SkillsDTO> getSkills(CustomUserDetail userDetail) {
-        return skillsRepository.findAll().stream()
+        return skillsRepository.findAllBySeller_Id(userDetail.getUser().getSeller().getId()).stream()
                 .map(mapperService::getSkill)
                 .toList();
     }
 
     @Override
     public SkillsDTO getSkill(CustomUserDetail userDetail, Long id) {
-        Skills skill = skillsRepository.findById(id)
+        Skills skill = skillsRepository.findAllByIdAndSeller_Id(id, userDetail.getUser().getSeller().getId())
                 .orElseThrow(() -> new SkillNotFoundException("This skill has not been found."));
-        if (!skill.getSeller().getUser().getId().equals(userDetail.getUser().getId())) {
-            throw new AccessDeniedException("You cannot obtain information about this pet.");
-        }
         return mapperService.getSkill(skill);
     }
 
     @Override
     public SkillsDTO updateSkill(CustomUserDetail userDetail, Long id, SkillsPutBodyDTO skillsPutBodyDTO) {
-        Skills skill = skillsRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("This skill has not been found."));
-        if (!skill.getSeller().getUser().getId().equals(userDetail.getUser().getId())) {
-            throw new AccessDeniedException("You cannot obtain information about this pet.");
+        List<Skills> skills = skillsRepository.update(id, userDetail.getUser().getSeller().getId(),
+                skillsPutBodyDTO.getTitle(), skillsPutBodyDTO.getDescription());
+        if (skills.isEmpty()) {
+            throw new SkillsNotFoundException("This skill was not found.");
         }
-        skill.setTitle(skillsPutBodyDTO.getTitle());
-        skill.setDescription(skillsPutBodyDTO.getDescription());
-        skill.setSeller(userDetail.getUser().getSeller());
-        return mapperService.getSkill(skillsRepository.save(skill));
+        return mapperService.getSkill(skillsRepository.save(skills.get(0)));
     }
 
     @Override
     public void deleteSkill(CustomUserDetail userDetail, Long id) {
-        Skills skill = skillsRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("This skill has not been found."));
-        if (!skill.getSeller().getUser().getId().equals(userDetail.getUser().getId())) {
-            throw new AccessDeniedException("You cannot obtain information about this pet.");
-        }
-        skillsRepository.delete(skill);
+        skillsRepository.deleteAndReturning(id, userDetail.getUser().getSeller().getId());
     }
 }

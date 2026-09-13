@@ -30,20 +30,10 @@ public class GlobalExceptionHandler {
         return body;
     }
 
-    @ExceptionHandler(AnimalIsNotSupported.class)
-    public ResponseEntity<Object> handleAnimalIsNotSupportedException(AnimalIsNotSupported ex) {
-        Map<String, Object> body = createMessage(ex);
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(SkillNotFoundException.class)
-    public ResponseEntity<Object> handleSkillNotFoundException(SkillNotFoundException ex) {
-        Map<String, Object> body = createMessage(ex);
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(TicketHasNotBeenCreatedException.class)
-    public ResponseEntity<Object> handleTicketHasNotBeenCreatedException(TicketHasNotBeenCreatedException ex) {
+    @ExceptionHandler({AnimalIsNotSupported.class, PetsNotFoundException.class,
+            SkillNotFoundException.class, TicketHasNotBeenCreatedException.class,
+            EntityNotFoundException.class})
+    public ResponseEntity<Object> handleAnimalIsNotSupportedException(Throwable ex) {
         Map<String, Object> body = createMessage(ex);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
@@ -64,13 +54,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Object> handleNoMailFoundException(NoMailFoundException ex) {
         Map<String, Object> body = createMessage(ex);
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException ex) {
-        Map<String, Object> body = createMessage(ex);
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(RuntimeException.class)

@@ -1,4 +1,7 @@
 spring:
+  servlet:
+    multipart:
+      enabled: true
   datasource:
     url: jdbc:postgresql://localhost:5434/dbKeenayEducation
     username: admin
@@ -51,6 +54,11 @@ rabbitmq:
     name-exception: email-exception
     retry-attempt: 5
 
+minio:
+  endpoint: http://localhost:9000
+  access-key: admin
+  secret-key: 1234567890
+  bucket-name: bucket
 
 logging:
   level:
