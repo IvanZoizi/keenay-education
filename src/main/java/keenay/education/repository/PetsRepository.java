@@ -24,7 +24,7 @@ public interface PetsRepository extends JpaRepository<Pets, Long> {
 
     @EntityGraph(attributePaths = {"petsProfile", "animal"})
     @Query("SELECT p FROM Pets p WHERE p.id = :id AND p.customer.user.id = :userId")
-    Optional<Pets> s(@Param("id") Long id, @Param("userId") Long userId);
+    Optional<Pets> findByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
 
     @Query(value = """
     DELETE FROM pets

@@ -37,7 +37,8 @@ public class Advertisement {
     private AdvertisementResponse selectedResponse;
 
     @Column(name = "status")
-    private AdvertisementStatus status;
+    @Enumerated(EnumType.STRING)
+    private AdvertisementStatus status = AdvertisementStatus.CREATED;
 
     @Column(name = "budget")
     private Integer budget;

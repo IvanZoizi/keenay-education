@@ -22,6 +22,7 @@ public class CustomUserDetail implements UserDetails {
         this.authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole()))
                 .collect(Collectors.toList());
+        System.out.println(this.authorities);
     }
 
     @Override

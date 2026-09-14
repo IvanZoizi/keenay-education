@@ -17,7 +17,7 @@ databaseChangeLog:
                   name: advertisement_id
                   type: BIGINT
                   constraints:
-                    nullable: false
+                    nullable: true
               - column:
                   name: client_id
                   type: BIGINT

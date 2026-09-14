@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.naming.AuthenticationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,25 +35,25 @@ public class GlobalExceptionHandler {
             SkillNotFoundException.class, TicketHasNotBeenCreatedException.class,
             EntityNotFoundException.class, TaskNotFoundException.class,
             AdvertisementNotFoundException.class})
-    public ResponseEntity<Object> handleAnimalIsNotSupportedException(Throwable ex) {
+    public ResponseEntity<Object> handleAnimalIsNotSupportedException(Exception ex) {
         Map<String, Object> body = createMessage(ex);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AuthorizationException.class)
-    public ResponseEntity<Object> handleAuthorizationExceptionException(AuthorizationException ex) {
+    public ResponseEntity<Object> handleAuthorizationExceptionException(Exception ex) {
         Map<String, Object> body = createMessage(ex);
         return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler({InternalException.class, NoMailFoundException.class, Exception.class})
-    public ResponseEntity<Object> handleInternalException(InternalException ex) {
+    public ResponseEntity<Object> handleInternalException(Exception ex) {
         Map<String, Object> body = createMessage(ex);
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntimeException(RuntimeException ex) {
+    @ExceptionHandler({RuntimeException.class, AuthenticationException.class, TaskBusyException.class})
+    public ResponseEntity<Object> handleRuntimeException(Exception ex) {
         Map<String, Object> body = createMessage(ex);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }

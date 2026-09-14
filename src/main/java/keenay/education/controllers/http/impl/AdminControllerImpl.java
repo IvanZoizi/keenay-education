@@ -26,7 +26,7 @@ public class AdminControllerImpl implements AdminController {
 
     @Override
     @PostMapping("/animal")
-    @PreAuthorize("hasAnyRole('ROLE_admin')")
+    @PreAuthorize("hasAuthority('ROLE_admin')")
     public ResponseEntity<AnimalDTO> createAnimal(@Valid @RequestBody AnimalBodyDTO animalBodyDTO) {
         return ResponseEntity.ok(animalService.createAnimal(animalBodyDTO));
     }
@@ -39,7 +39,7 @@ public class AdminControllerImpl implements AdminController {
 
     @Override
     @DeleteMapping("/animal")
-    @PreAuthorize("hasAnyRole('ROLE_admin')")
+    @PreAuthorize("hasAuthority('ROLE_admin')")
     public ResponseEntity<Void> deleteAnimal(@Valid @RequestBody AnimalBodyDTO animalBodyDTO) {
         animalService.deleteAnimal(animalBodyDTO);
         return ResponseEntity.noContent().build();

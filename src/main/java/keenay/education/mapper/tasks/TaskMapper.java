@@ -12,7 +12,7 @@ public interface TaskMapper {
             @Mapping(source = "task.id", target="id"),
             @Mapping(source = "task.title", target = "title"),
             @Mapping(source = "task.description", target = "description"),
-            @Mapping(source = "task.photo", target = "animal"),
+            @Mapping(source = "task.photoUrl", target = "photoUrl"),
             @Mapping(source = "task.advertisement.id", target = "advertisementId"),
             @Mapping(source = "task.status", target = "status")
     })

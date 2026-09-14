@@ -9,7 +9,9 @@ import keenay.education.security.CustomUserDetail;
 import keenay.education.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -17,25 +19,26 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-@Controller
+@RestController
 @Slf4j
 @RequiredArgsConstructor
 public class TasksControllerImpl implements TaskController {
 
     private final TaskService taskService;
 
-    @Override
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<TaskDTO> createTask(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
-            @Valid @RequestBody TaskBodyDTO taskBodyDTO,
-            @RequestParam("file") MultipartFile photo
+            @Valid @ModelAttribute TaskBodyDTO taskBodyDTO,
+            @RequestPart(value = "file", required = false) MultipartFile file
     ) {
-        return ResponseEntity.ok(taskService.createTask(customUserDetail, taskBodyDTO, photo));
+        return ResponseEntity.ok(taskService.createTask(customUserDetail, taskBodyDTO, file));
     }
 
     @Override
     @GetMapping("/")
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<TaskDTO> getTask(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
             @PathVariable("id")  Long id
@@ -45,18 +48,21 @@ public class TasksControllerImpl implements TaskController {
 
     @Override
     @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<List<TaskDTO>> getAvailTasks(@AuthenticationPrincipal CustomUserDetail customUserDetail) {
         return ResponseEntity.ok(taskService.getAvailTasks(customUserDetail));
     }
 
     @Override
     @GetMapping("/created")
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<List<TaskDTO>> getCreatedTasks(@AuthenticationPrincipal CustomUserDetail customUserDetail) {
         return ResponseEntity.ok(taskService.getCreatedTasks(customUserDetail));
     }
 
     @Override
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<TaskDTO> updateTask(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
             @PathVariable("id") Long id,
@@ -66,7 +72,8 @@ public class TasksControllerImpl implements TaskController {
     }
 
     @Override
-    @PutMapping("/photo/{id}")
+    @PutMapping(value = "/photo/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<TaskDTO> updatePhotoTask(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
             @PathVariable("id") Long id,
@@ -77,6 +84,7 @@ public class TasksControllerImpl implements TaskController {
 
     @Override
     @PutMapping("/status/{id}")
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<TaskDTO> updateTaskStatus(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
             @PathVariable("id") Long id,
@@ -87,6 +95,7 @@ public class TasksControllerImpl implements TaskController {
 
     @Override
     @PostMapping("/{id}/advertisement/{advertisementId}")
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<TaskDTO> setAdvertisement(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
             @PathVariable("id") Long id,
@@ -96,7 +105,8 @@ public class TasksControllerImpl implements TaskController {
     }
 
     @Override
-    @DeleteMapping
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<Void> deleteTask(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
             @PathVariable("id") Long id

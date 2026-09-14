@@ -10,6 +10,7 @@ import keenay.education.service.SkillsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class SkillsControllerImpl implements SkillsController {
 
     @Override
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_seller')")
     public ResponseEntity<SkillsDTO> createSkillForUser(
             @AuthenticationPrincipal CustomUserDetail userDetail,
             @Valid @RequestBody SkillsBodyDTO skillsBodyDTO) {
@@ -32,12 +34,14 @@ public class SkillsControllerImpl implements SkillsController {
 
     @Override
     @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_seller')")
     public ResponseEntity<List<SkillsDTO>> getSkills(@AuthenticationPrincipal CustomUserDetail userDetail) {
         return ResponseEntity.ok(skillsService.getSkills(userDetail));
     }
 
     @Override
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_seller')")
     public ResponseEntity<SkillsDTO> getSkill(
             @AuthenticationPrincipal CustomUserDetail userDetail,
             @PathVariable("id") Long id
@@ -47,6 +51,7 @@ public class SkillsControllerImpl implements SkillsController {
 
     @Override
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_seller')")
     public ResponseEntity<SkillsDTO> updateSkill(
             @AuthenticationPrincipal CustomUserDetail userDetail,
             @PathVariable("id") Long id,
@@ -57,6 +62,7 @@ public class SkillsControllerImpl implements SkillsController {
 
     @Override
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_seller')")
     public ResponseEntity<Void> deleteSkill(
             @AuthenticationPrincipal CustomUserDetail userDetail,
             @PathVariable("id") Long id

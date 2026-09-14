@@ -20,7 +20,7 @@ public class Tasks {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(referencedColumnName = "id", name = "advertisement_id")
+    @JoinColumn(referencedColumnName = "id", name = "advertisement_id", nullable = true)
     private Advertisement advertisement;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -31,6 +31,7 @@ public class Tasks {
     private String photoUrl;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private TasksStatus status = TasksStatus.CREATED;
 
     @Column(name = "title")

@@ -26,6 +26,7 @@ public class PetsControllerImpl implements PetsController {
 
     @Override
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_customer')")
 //    @PreAuthorize("hasAnyRole('ROLE_customer')")
     public ResponseEntity<PetsDTO> createPets(
             @AuthenticationPrincipal CustomUserDetail userDetail,

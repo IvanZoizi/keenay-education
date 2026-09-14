@@ -18,5 +18,6 @@ public interface TaskService {
     TaskDTO updatePhotoTask(CustomUserDetail customUserDetail, Long id, MultipartFile photo);
     TaskDTO updateTaskStatus(CustomUserDetail customUserDetail, Long id, TaskBodyStatusDTO taskBodyStatusDTO);
     TaskDTO setAdvertisement(CustomUserDetail customUserDetail, Long id, Long advertisementId);
+    TaskDTO deleteAdvertisement(CustomUserDetail customUserDetail, Long id);
     void deleteTask(CustomUserDetail customUserDetail, Long id);
 }

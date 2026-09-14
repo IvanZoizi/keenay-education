@@ -7,6 +7,7 @@ import keenay.education.entity.Advertisement;
 import keenay.education.entity.Tasks;
 import keenay.education.entity.status.TasksStatus;
 import keenay.education.exception.errors.AdvertisementNotFoundException;
+import keenay.education.exception.errors.TaskBusyException;
 import keenay.education.exception.errors.TaskNotFoundException;
 import keenay.education.mapper.tasks.TaskMapper;
 import keenay.education.repository.AdvertisementRepository;
@@ -34,8 +35,11 @@ public class TaskServiceImpl implements TaskService {
 
     private Tasks createTaskWithPhoto(CustomUserDetail userDetail, TaskBodyDTO taskBodyDTO, MultipartFile photo) {
         Tasks task = new Tasks();
+        task.setCustomer(userDetail.getUser().getCustomer());
         task.setTitle(taskBodyDTO.getTitle());
         task.setDescription(taskBodyDTO.getDescription());
+        System.out.println(photo);
+        System.out.println(photo.isEmpty());
         if (!photo.isEmpty()) {
             task.setPhotoUrl(imageService.uploadPhoto(photo, userDetail));
         }
@@ -94,7 +98,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskDTO updateTaskStatus(CustomUserDetail customUserDetail, Long id, TaskBodyStatusDTO taskBodyStatusDTO) {
         List<Tasks> tasks = tasksRepository.updateTaskStatus(id, customUserDetail.getUser().getCustomer().getId(),
-                taskBodyStatusDTO.getStatus());
+                taskBodyStatusDTO.getStatus().name());
         if (tasks.isEmpty()) {
             throw new TaskNotFoundException("This task is not found.");
         }
@@ -107,8 +111,23 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new AdvertisementNotFoundException("This advertisement not found."));
         Tasks task = tasksRepository.findByIdAndCustomer_Id(id, customUserDetail.getUser().getCustomer().getId())
                 .orElseThrow(() -> new TaskNotFoundException("This task is not found."));
+        if (task.getAdvertisement() != null) {
+            throw new TaskBusyException("Task is busy");
+        }
         task.setAdvertisement(advertisement);
+        this.updateTaskStatus(customUserDetail, id, new TaskBodyStatusDTO(TasksStatus.PROGRESS));
         return taskMapper.getDTO(tasksRepository.save(task));
+    }
+
+    @Override
+    public TaskDTO deleteAdvertisement(CustomUserDetail customUserDetail, Long id) {
+        List<Tasks> tasks = tasksRepository.deleteAdvertisement(id,
+                customUserDetail.getUser().getCustomer().getId(), null);
+        if (tasks.isEmpty()) {
+            throw new TaskNotFoundException("This task is not found.");
+        }
+        this.updateTaskStatus(customUserDetail, id, new TaskBodyStatusDTO(TasksStatus.CREATED));
+        return taskMapper.getDTO(tasks.get(0));
     }
 
 
