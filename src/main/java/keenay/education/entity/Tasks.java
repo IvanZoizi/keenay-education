@@ -23,6 +23,10 @@ public class Tasks {
     @JoinColumn(referencedColumnName = "id", name = "advertisement_id")
     private Advertisement advertisement;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(referencedColumnName = "id", name = "client_id")
+    private Customers customer;
+
     @Column(name = "photo", nullable = true)
     private String photoUrl;
 

@@ -2,12 +2,15 @@ package keenay.education.service.image;
 
 import io.minio.*;
 import io.minio.errors.MinioException;
+import keenay.education.security.CustomUserDetail;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -17,21 +20,24 @@ public class ImageService {
     private final MinioClient minioClient;
     @Value("${minio.bucket-name}") private String bucketName;
 
-    public String uploadPhoto(MultipartFile photo) {
+    public String uploadPhoto(MultipartFile photo, CustomUserDetail customUserDetail) {
         try {
             boolean found = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
             if (!found) {
                 minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
             }
+            String ext = StringUtils.getFilenameExtension(photo.getOriginalFilename());
+            String objectName = "users/" + customUserDetail.getUser() + "/photos/" + UUID.randomUUID()
+                    + (ext != null ? "." + ext : "");
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucketName)
-                            .object(photo.getOriginalFilename())
+                            .object(objectName)
                             .stream(photo.getInputStream(), photo.getSize(), -1L)
                             .contentType(photo.getContentType())
                             .build()
             );
-            return photo.getOriginalFilename();
+            return objectName;
         } catch (Exception exception) {
             log.error(String.valueOf(exception));
             return null;

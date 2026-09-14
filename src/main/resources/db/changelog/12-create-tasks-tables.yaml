@@ -19,6 +19,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: client_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
                   name: photo
                   type: VARCHAR(255)
               - column:
@@ -46,4 +51,11 @@ databaseChangeLog:
             referencedTableName: advertisement
             referencedColumnNames: id
             constraintName: fk_tasks_advertisement
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: tasks
+            baseColumnNames: client_id
+            referencedTableName: customers
+            referencedColumnNames: id
+            constraintName: fk_tasks_customers
             onDelete: CASCADE

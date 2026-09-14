@@ -3,14 +3,12 @@ package keenay.education.dto.tasks;
 import keenay.education.entity.status.TasksStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Data
 @NoArgsConstructor
-public class TaskDTO {
-    private Long id;
-    private String title;
-    private String description;
-    private String photoUrl = null;
-    private String advertisementId = null;
+public class TaskBodyStatusDTO
+{
+    @NonNull
     private TasksStatus status;
 }
