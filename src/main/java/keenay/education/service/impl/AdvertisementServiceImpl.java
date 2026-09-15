@@ -110,7 +110,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     @Override
     public AdvertisementDTO updateStatus(CustomUserDetail customUserDetail, Long id, AdvertisementBodyStatusDTO advertisementBodyStatusDTO) {
         List<Advertisement> advertisements = advertisementRepository.updateStatus(
-                id, customUserDetail.getUser().getCustomer().getId(), advertisementBodyStatusDTO.getStatus());
+                id, customUserDetail.getUser().getCustomer().getId(), advertisementBodyStatusDTO.getStatus().name());
         if (advertisements.isEmpty()) {
             throw new AdvertisementNotFoundException("Advertisement is not found.");
         }
@@ -123,13 +123,13 @@ public class AdvertisementServiceImpl implements AdvertisementService {
         AdvertisementResponse advertisementResponse = advertisementResponseRepository.findByIdAndSeller_Id(
                 responseId, customUserDetail.getUser().getSeller().getId()
         ).orElseThrow(() -> new AdvertisementResponseNotFoundException("Advertisement response is not found."));
-        if (advertisementResponse.getAdvertisement() != null) {
+        System.out.println(advertisementResponse.getStatus());
+        if (advertisementResponse.getStatus() != AdvertisementResponseStatus.CREATED) {
             throw new AdvertisementResponseBusyException("Advertisement response is busy.");
         }
         advertisementResponseService.updateStatus(
                 customUserDetail, responseId,
                 new AdvertisementResponseBodyStatusDTO(AdvertisementResponseStatus.SELECTED));
-        this.updateStatus(customUserDetail, id, new AdvertisementBodyStatusDTO(AdvertisementStatus.PROGRESS));
         Advertisement advertisement = advertisementRepository.findByIdAndCustomer_Id(id,
                         customUserDetail.getUser().getCustomer().getId())
                 .orElseThrow(() -> new AdvertisementNotFoundException("Advertisement is not found."));
@@ -138,6 +138,13 @@ public class AdvertisementServiceImpl implements AdvertisementService {
                     customUserDetail, response.getId(),
                     new AdvertisementResponseBodyStatusDTO(AdvertisementResponseStatus.REJECTED));
         }
-        return advertisementMapper.getDTO(advertisement);
+        return this.updateStatus(customUserDetail, id, new AdvertisementBodyStatusDTO(AdvertisementStatus.PROGRESS));
+    }
+
+    @Override
+    public List<AdvertisementDTO> getAdvertisementBySkills(CustomUserDetail customUserDetail) {
+        return advertisementRepository.findAdvertisementBySkills(customUserDetail.getUser().getSeller().getId()).stream()
+                .map(advertisementMapper::getDTO)
+                .toList();
     }
 }

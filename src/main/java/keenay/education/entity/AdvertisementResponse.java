@@ -35,7 +35,7 @@ public class AdvertisementResponse {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private AdvertisementResponseStatus status;
+    private AdvertisementResponseStatus status = AdvertisementResponseStatus.CREATED;
 
     @Column(name = "created_at")
     @CreationTimestamp

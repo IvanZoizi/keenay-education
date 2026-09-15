@@ -21,8 +21,18 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
     @Query(value = "DELETE FROM advertisement WHERE id = :id AND client_id = :customer_id", nativeQuery = true)
     void delete(@Param("id") Long id, @Param("customer_id") Long customerId);
 
-    @Query(value = "UPDATE advertisement SET status = :status WHERE id = :id AND client_id :customer_id RETURNING *",
+    @Query(value = "UPDATE advertisement SET status = :status WHERE id = :id AND client_id = :customer_id RETURNING *",
     nativeQuery = true)
     List<Advertisement> updateStatus(@Param("id") Long id, @Param("customer_id") Long customerId,
-                                     @Param("status")AdvertisementStatus status);
+                                     @Param("status") String status);
+
+    @Query("""
+        SELECT a FROM Advertisement a
+        JOIN a.pet p
+        JOIN p.animal an
+        WHERE an.id IN (
+            SELECT s.animal.id FROM Skills s WHERE s.seller.id = :sellerId AND a.status = CREATED
+        )
+        """)
+    List<Advertisement> findAdvertisementBySkills(@Param("sellerId") Long sellerId);
 }

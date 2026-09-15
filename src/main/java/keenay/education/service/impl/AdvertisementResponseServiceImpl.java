@@ -30,9 +30,9 @@ public class AdvertisementResponseServiceImpl implements AdvertisementResponseSe
                                          AdvertisementResponseBodyDTO advertisementResponseBodyDTO) {
         AdvertisementResponse advertisementResponse = new AdvertisementResponse();
         advertisementResponse.setSeller(customUserDetail.getUser().getSeller());
-        advertisementResponse.setPrice(advertisementResponse.getPrice());
+        advertisementResponse.setPrice(advertisementResponseBodyDTO.getPrice());
         advertisementResponse.setAdvertisement(advertisement);
-        advertisementResponse.setComment(advertisementResponse.getComment());
+        advertisementResponse.setComment(advertisementResponseBodyDTO.getComment());
         return advertisementResponseRepository.save(advertisementResponse);
     }
 

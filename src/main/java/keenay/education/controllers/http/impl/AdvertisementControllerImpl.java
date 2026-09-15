@@ -99,4 +99,12 @@ public class AdvertisementControllerImpl implements AdvertisementController {
     ) {
         return ResponseEntity.ok(advertisementService.setResponse(userDetail, id, responseId));
     }
+
+    @GetMapping("/by/skill")
+    @PreAuthorize("hasAuthority('ROLE_seller')")
+    public ResponseEntity<List<AdvertisementDTO>> getAdvertisementBySkills(
+            @AuthenticationPrincipal CustomUserDetail userDetail
+    ) {
+        return ResponseEntity.ok(advertisementService.getAdvertisementBySkills(userDetail));
+    }
 }

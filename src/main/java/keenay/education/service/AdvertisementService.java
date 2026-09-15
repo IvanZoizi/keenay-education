@@ -20,4 +20,5 @@ public interface AdvertisementService {
     AdvertisementDTO updateStatus(CustomUserDetail customUserDetail, Long Id,
                                   AdvertisementBodyStatusDTO advertisementBodyStatusDTO);
     AdvertisementDTO setResponse(CustomUserDetail customUserDetail, Long id, Long responseId);
+    List<AdvertisementDTO> getAdvertisementBySkills(CustomUserDetail customUserDetail);
 }
