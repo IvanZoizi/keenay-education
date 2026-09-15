@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({AnimalIsNotSupported.class, PetsNotFoundException.class,
             SkillNotFoundException.class, TicketHasNotBeenCreatedException.class,
             EntityNotFoundException.class, TaskNotFoundException.class,
-            AdvertisementNotFoundException.class})
+            AdvertisementNotFoundException.class, AdvertisementResponseNotFoundException.class})
     public ResponseEntity<Object> handleAnimalIsNotSupportedException(Exception ex) {
         Map<String, Object> body = createMessage(ex);
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
@@ -52,7 +52,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({RuntimeException.class, AuthenticationException.class, TaskBusyException.class})
+    @ExceptionHandler({RuntimeException.class, AuthenticationException.class, TaskBusyException.class,
+            AdvertisementResponseBusyException.class})
     public ResponseEntity<Object> handleRuntimeException(Exception ex) {
         Map<String, Object> body = createMessage(ex);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);

@@ -80,7 +80,7 @@ public class AdvertisementControllerImpl implements AdvertisementController {
     }
 
     // TODO проверить код
-    @PutMapping("/{id}/status/")
+    @PutMapping("/status/{id}")
     @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<AdvertisementDTO> updateStatus(
             @AuthenticationPrincipal CustomUserDetail userDetail,
@@ -88,5 +88,15 @@ public class AdvertisementControllerImpl implements AdvertisementController {
             @Valid @RequestBody AdvertisementBodyStatusDTO advertisementBodyStatusDTO
     ) {
         return ResponseEntity.ok(advertisementService.updateStatus(userDetail, id, advertisementBodyStatusDTO));
+    }
+
+    @PutMapping("/{id}/response/{responseId}")
+    @PreAuthorize("hasAuthority('ROLE_customer')")
+    public ResponseEntity<AdvertisementDTO> setResponse(
+            @AuthenticationPrincipal CustomUserDetail userDetail,
+            @PathVariable("id") Long id,
+            @PathVariable("responseId") Long responseId
+    ) {
+        return ResponseEntity.ok(advertisementService.setResponse(userDetail, id, responseId));
     }
 }

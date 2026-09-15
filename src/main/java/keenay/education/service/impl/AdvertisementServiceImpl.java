@@ -3,19 +3,19 @@ package keenay.education.service.impl;
 import keenay.education.dto.advertisement.AdvertisementBodyDTO;
 import keenay.education.dto.advertisement.AdvertisementBodyStatusDTO;
 import keenay.education.dto.advertisement.AdvertisementDTO;
-import keenay.education.entity.Advertisement;
-import keenay.education.entity.Customers;
-import keenay.education.entity.Pets;
-import keenay.education.entity.Tasks;
-import keenay.education.exception.errors.AdvertisementNotFoundException;
-import keenay.education.exception.errors.PetsNotFoundException;
-import keenay.education.exception.errors.TaskBusyException;
-import keenay.education.exception.errors.TaskNotFoundException;
+import keenay.education.dto.advertisement_response.AdvertisementResponseBodyStatusDTO;
+import keenay.education.dto.advertisement_response.AdvertisementResponseDTO;
+import keenay.education.entity.*;
+import keenay.education.entity.status.AdvertisementResponseStatus;
+import keenay.education.entity.status.AdvertisementStatus;
+import keenay.education.exception.errors.*;
 import keenay.education.mapper.advertisement.AdvertisementMapper;
 import keenay.education.repository.AdvertisementRepository;
+import keenay.education.repository.AdvertisementResponseRepository;
 import keenay.education.repository.PetsRepository;
 import keenay.education.repository.TasksRepository;
 import keenay.education.security.CustomUserDetail;
+import keenay.education.service.AdvertisementResponseService;
 import keenay.education.service.AdvertisementService;
 import keenay.education.service.PetsService;
 import keenay.education.service.TaskService;
@@ -36,6 +36,8 @@ public class AdvertisementServiceImpl implements AdvertisementService {
     private final TasksRepository tasksRepository;
     private final AdvertisementRepository advertisementRepository;
     private final AdvertisementMapper advertisementMapper;
+    private final AdvertisementResponseRepository advertisementResponseRepository;
+    private final AdvertisementResponseService advertisementResponseService;
 
     private Advertisement createAdvertisementWithEntity(Customers customer, Pets pet,
                                                         AdvertisementBodyDTO advertisementBodyDTO) {
@@ -113,5 +115,29 @@ public class AdvertisementServiceImpl implements AdvertisementService {
             throw new AdvertisementNotFoundException("Advertisement is not found.");
         }
         return advertisementMapper.getDTO(advertisements.get(0));
+    }
+
+    @Override
+    @Transactional
+    public AdvertisementDTO setResponse(CustomUserDetail customUserDetail, Long id, Long responseId) {
+        AdvertisementResponse advertisementResponse = advertisementResponseRepository.findByIdAndSeller_Id(
+                responseId, customUserDetail.getUser().getSeller().getId()
+        ).orElseThrow(() -> new AdvertisementResponseNotFoundException("Advertisement response is not found."));
+        if (advertisementResponse.getAdvertisement() != null) {
+            throw new AdvertisementResponseBusyException("Advertisement response is busy.");
+        }
+        advertisementResponseService.updateStatus(
+                customUserDetail, responseId,
+                new AdvertisementResponseBodyStatusDTO(AdvertisementResponseStatus.SELECTED));
+        this.updateStatus(customUserDetail, id, new AdvertisementBodyStatusDTO(AdvertisementStatus.PROGRESS));
+        Advertisement advertisement = advertisementRepository.findByIdAndCustomer_Id(id,
+                        customUserDetail.getUser().getCustomer().getId())
+                .orElseThrow(() -> new AdvertisementNotFoundException("Advertisement is not found."));
+        for (AdvertisementResponse response : advertisement.getResponses()) {
+            advertisementResponseService.updateStatus(
+                    customUserDetail, response.getId(),
+                    new AdvertisementResponseBodyStatusDTO(AdvertisementResponseStatus.REJECTED));
+        }
+        return advertisementMapper.getDTO(advertisement);
     }
 }

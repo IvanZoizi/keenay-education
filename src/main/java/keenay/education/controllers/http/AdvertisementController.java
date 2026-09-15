@@ -45,4 +45,10 @@ public interface AdvertisementController {
             @PathVariable("id") Long id,
             @PathVariable("taskId") Long taskId
     );
+
+    ResponseEntity<AdvertisementDTO> setResponse(
+            @AuthenticationPrincipal CustomUserDetail userDetail,
+            @PathVariable("id") Long id,
+            @PathVariable("responseId") Long responseId
+    );
 }

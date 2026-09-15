@@ -23,7 +23,7 @@ public class AdvertisementResponse {
     @JoinColumn(referencedColumnName = "id", name = "seller_id")
     private Sellers seller;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "advertisement_id", referencedColumnName = "id")
     private Advertisement advertisement;
 
@@ -34,6 +34,7 @@ public class AdvertisementResponse {
     private String comment;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private AdvertisementResponseStatus status;
 
     @Column(name = "created_at")

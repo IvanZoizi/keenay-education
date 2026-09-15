@@ -3,6 +3,8 @@ package keenay.education.service;
 import keenay.education.dto.advertisement.AdvertisementBodyDTO;
 import keenay.education.dto.advertisement.AdvertisementBodyStatusDTO;
 import keenay.education.dto.advertisement.AdvertisementDTO;
+import keenay.education.dto.advertisement_response.AdvertisementResponseBodyDTO;
+import keenay.education.dto.advertisement_response.AdvertisementResponseDTO;
 import keenay.education.entity.Advertisement;
 import keenay.education.security.CustomUserDetail;
 
@@ -17,4 +19,5 @@ public interface AdvertisementService {
     AdvertisementDTO deleteTask(CustomUserDetail customUserDetail, Long id, Long taskId);
     AdvertisementDTO updateStatus(CustomUserDetail customUserDetail, Long Id,
                                   AdvertisementBodyStatusDTO advertisementBodyStatusDTO);
+    AdvertisementDTO setResponse(CustomUserDetail customUserDetail, Long id, Long responseId);
 }
