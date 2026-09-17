@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Table(name = "chat")
+@Table(name = "messages")
 @NoArgsConstructor
 public class Messages {
     @Id
@@ -30,7 +30,7 @@ public class Messages {
     @JoinColumn(referencedColumnName = "id", name = "sender_role_id")
     private Roles role;
 
-    @Column(name = "photo")
+    @Column(name = "photo", nullable = true)
     private String photo;
 
     @Column(name = "text")

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>WS Chat Tester</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    max-width: 900px;
+    margin: 24px auto;
+    padding: 0 16px;
+  }
+  fieldset {
+    border: 1px solid #8883;
+    border-radius: 8px;
+    padding: 12px 16px 16px;
+    margin-bottom: 16px;
+  }
+  legend { font-weight: 600; padding: 0 6px; }
+  label { display: block; font-size: 13px; margin-top: 8px; margin-bottom: 2px; opacity: .8; }
+  input, textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #8886;
+    font-family: inherit;
+    font-size: 14px;
+  }
+  textarea { resize: vertical; min-height: 50px; }
+  .row { display: flex; gap: 10px; }
+  .row > * { flex: 1; }
+  button {
+    margin-top: 10px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    background: #4f46e5;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button:hover { background: #4338ca; }
+  button.secondary { background: #6b7280; }
+  button.secondary:hover { background: #52525b; }
+  button:disabled { background: #9ca3af; cursor: not-allowed; }
+  #status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+  .disconnected { background: #fee2e2; color: #991b1b; }
+  .connected { background: #dcfce7; color: #166534; }
+  .connecting { background: #fef9c3; color: #854d0e; }
+  #log {
+    background: #111827;
+    color: #d1d5db;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 12.5px;
+    padding: 12px;
+    border-radius: 8px;
+    height: 320px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .log-in { color: #86efac; }
+  .log-out { color: #93c5fd; }
+  .log-err { color: #fca5a5; }
+  .log-sys { color: #d1d5db; }
+  h1 { font-size: 20px; }
+  h3 { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<h1>WS Chat Tester <span id="status" class="disconnected">Не подключено</span></h1>
+
+<fieldset>
+  <legend>Подключение</legend>
+  <div class="row">
+    <div>
+      <label>WebSocket endpoint (SockJS)</label>
+      <input id="wsUrl" value="http://localhost:8080/ws">
+    </div>
+    <div>
+      <label>Authorization header (CONNECT)</label>
+      <input id="authHeader" placeholder="Bearer eyJhbGciOi...">
+    </div>
+  </div>
+  <button id="connectBtn" onclick="connect()">Подключиться</button>
+  <button id="disconnectBtn" class="secondary" onclick="disconnect()" disabled>Отключиться</button>
+</fieldset>
+
+<fieldset>
+  <legend>Подписка на чат</legend>
+  <div class="row">
+    <div>
+      <label>Chat ID</label>
+      <input id="chatId" type="number" placeholder="1">
+    </div>
+    <div style="flex:2; display:flex; align-items:flex-end; gap:10px;">
+      <button id="subBtn" onclick="subscribeChat()" disabled>Подписаться на /topic/chats/{id}</button>
+      <button id="unsubBtn" class="secondary" onclick="unsubscribeChat()" disabled>Отписаться</button>
+    </div>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>Отправить сообщение (STOMP SEND → /app/chat)</legend>
+  <label>Текст</label>
+  <textarea id="msgText" placeholder="Привет!"></textarea>
+  <button id="sendBtn" onclick="sendMessage()" disabled>Отправить</button>
+</fieldset>
+
+<fieldset>
+  <legend>REST: история сообщений (GET /chats/{id}/messages)</legend>
+  <div class="row">
+    <div>
+      <label>Base API URL</label>
+      <input id="apiBase" value="http://localhost:8080">
+    </div>
+    <div>
+      <label>page / size</label>
+      <div class="row">
+        <input id="page" type="number" value="0">
+        <input id="size" type="number" value="20">
+      </div>
+    </div>
+  </div>
+  <button onclick="fetchHistory()">Загрузить историю</button>
+</fieldset>
+
+<fieldset>
+  <legend>Лог <button class="secondary" style="margin:0; float:right; padding:4px 10px;" onclick="clearLog()">Очистить</button></legend>
+  <div id="log"></div>
+</fieldset>
+
+<script>
+let stompClient = null;
+let subscription = null;
+
+function log(msg, cls) {
+  const el = document.getElementById('log');
+  const time = new Date().toLocaleTimeString();
+  const line = document.createElement('div');
+  line.className = cls || 'log-sys';
+  line.textContent = `[${time}] ${msg}`;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+function setStatus(text, cls) {
+  const el = document.getElementById('status');
+  el.textContent = text;
+  el.className = cls;
+}
+
+function setButtons(connected) {
+  document.getElementById('connectBtn').disabled = connected;
+  document.getElementById('disconnectBtn').disabled = !connected;
+  document.getElementById('subBtn').disabled = !connected;
+  document.getElementById('sendBtn').disabled = !connected;
+}
+
+function connect() {
+  const url = document.getElementById('wsUrl').value.trim();
+  const authHeader = document.getElementById('authHeader').value.trim();
+
+  if (!url) { alert('Укажи WebSocket endpoint'); return; }
+  if (!authHeader) { alert('Укажи Authorization header, например: Bearer eyJ...'); return; }
+
+  setStatus('Подключение...', 'connecting');
+  log(`Connecting to ${url}`, 'log-sys');
+
+  const socket = new SockJS(url);
+  stompClient = Stomp.over(socket);
+  stompClient.debug = (str) => log(str, 'log-sys');
+
+  const headers = { Authorization: authHeader };
+
+  stompClient.connect(
+    headers,
+    (frame) => {
+      setStatus('Подключено', 'connected');
+      setButtons(true);
+      log(`CONNECTED: ${frame}`, 'log-in');
+    },
+    (error) => {
+      setStatus('Ошибка / отключено', 'disconnected');
+      setButtons(false);
+      log(`STOMP ERROR: ${JSON.stringify(error)}`, 'log-err');
+    }
+  );
+}
+
+function disconnect() {
+  if (stompClient) {
+    if (subscription) { subscription.unsubscribe(); subscription = null; }
+    stompClient.disconnect(() => {
+      log('Disconnected', 'log-sys');
+      setStatus('Не подключено', 'disconnected');
+      setButtons(false);
+    });
+  }
+}
+
+function subscribeChat() {
+  const chatId = document.getElementById('chatId').value.trim();
+  if (!chatId) { alert('Укажи chatId'); return; }
+  if (subscription) { subscription.unsubscribe(); }
+
+  const dest = `/topic/chats/${chatId}`;
+  subscription = stompClient.subscribe(dest, (message) => {
+    log(`IN  ${dest}\n${message.body}`, 'log-in');
+  });
+  log(`Subscribed to ${dest}`, 'log-sys');
+  document.getElementById('unsubBtn').disabled = false;
+}
+
+function unsubscribeChat() {
+  if (subscription) {
+    subscription.unsubscribe();
+    subscription = null;
+    log('Unsubscribed', 'log-sys');
+    document.getElementById('unsubBtn').disabled = true;
+  }
+}
+
+function sendMessage() {
+  const chatId = document.getElementById('chatId').value.trim();
+  const text = document.getElementById('msgText').value;
+  if (!chatId) { alert('Укажи chatId'); return; }
+  if (!text) { alert('Введи текст сообщения'); return; }
+
+  const payload = { chatId: Number(chatId), text: text };
+  stompClient.send('/app/chat', {}, JSON.stringify(payload));
+  log(`OUT /app/chat\n${JSON.stringify(payload)}`, 'log-out');
+  document.getElementById('msgText').value = '';
+}
+
+async function fetchHistory() {
+  const base = document.getElementById('apiBase').value.trim();
+  const chatId = document.getElementById('chatId').value.trim();
+  const page = document.getElementById('page').value || 0;
+  const size = document.getElementById('size').value || 20;
+  const authHeader = document.getElementById('authHeader').value.trim();
+
+  if (!chatId) { alert('Укажи chatId'); return; }
+
+  const url = `${base}/chats/${chatId}/messages?page=${page}&size=${size}`;
+  log(`GET ${url}`, 'log-out');
+
+  try {
+    const res = await fetch(url, {
+      headers: authHeader ? { Authorization: authHeader } : {}
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      log(`HTTP ${res.status}\n${text}`, 'log-err');
+      return;
+    }
+    log(`RESPONSE ${res.status}\n${text}`, 'log-in');
+  } catch (e) {
+    log(`FETCH ERROR: ${e}`, 'log-err');
+  }
+}
+
+function clearLog() {
+  document.getElementById('log').innerHTML = '';
+}
+</script>
+
+</body>
+</html>

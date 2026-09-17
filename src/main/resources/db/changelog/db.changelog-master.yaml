@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/15-insert-initial-data.yaml
   - include:
       file: db/changelog/16-create-emails-user-tables.yaml
+  - include:
+      file: db/changelog/17-add-sender-role-and-fix-photo.yaml

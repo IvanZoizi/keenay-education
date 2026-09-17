@@ -20,11 +20,11 @@ public class Chat {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(referencedColumnName = "id", name = "seller_id")
     private Users seller;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(referencedColumnName = "id", name = "customer_id")
     private Users customer;
 

@@ -38,8 +38,8 @@ public class AdvertisementResponseServiceImpl implements AdvertisementResponseSe
 
     @Override
     public AdvertisementResponseDTO createAdvertisementResponse(CustomUserDetail customUserDetail, AdvertisementResponseBodyDTO advertisementResponseBodyDTO) {
-        Advertisement advertisement = advertisementRepository.findByIdAndCustomer_Id(
-                advertisementResponseBodyDTO.getAdvertisementId(), customUserDetail.getUser().getCustomer().getId()
+        Advertisement advertisement = advertisementRepository.findById(
+                advertisementResponseBodyDTO.getAdvertisementId()
         ).orElseThrow(() -> new AdvertisementNotFoundException("Advertisement is not found."));
         return advertisementResponseMapping.getDTO(
                 create(customUserDetail, advertisement, advertisementResponseBodyDTO));
@@ -63,8 +63,9 @@ public class AdvertisementResponseServiceImpl implements AdvertisementResponseSe
 
     @Override
     public List<AdvertisementResponseDTO> getResponses(CustomUserDetail customUserDetail, Long id) {
-        return advertisementResponseRepository.findAllByAdvertisement_IdAndSeller_Id(
-                id, customUserDetail.getUser().getSeller().getId())
+        return advertisementRepository.findByIdAndCustomer_Id(id, customUserDetail.getUser().getCustomer().getId())
+                .orElseThrow(() -> new AdvertisementNotFoundException("Advertisement is not found."))
+                .getResponses()
                 .stream()
                 .map(advertisementResponseMapping::getDTO)
                 .toList();

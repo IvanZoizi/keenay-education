@@ -1,0 +1,24 @@
+databaseChangeLog:
+  - changeSet:
+      id: 17
+      author: system
+      changes:
+        - addColumn:
+            tableName: messages
+            columns:
+              - column:
+                  name: sender_role_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: messages
+            baseColumnNames: sender_role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_messages_sender_role
+            onDelete: RESTRICT
+        - dropNotNullConstraint:
+            tableName: messages
+            columnName: photo
+            columnDataType: VARCHAR(255)

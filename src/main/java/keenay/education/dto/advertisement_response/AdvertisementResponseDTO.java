@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 public class AdvertisementResponseDTO {
     private Long id;
     private Long advertisementId;
+    private Long sellerId;
     private Integer price;
     private String comment;
     private AdvertisementResponseStatus status;

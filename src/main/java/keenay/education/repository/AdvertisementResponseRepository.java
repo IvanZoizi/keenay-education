@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface AdvertisementResponseRepository extends JpaRepository<AdvertisementResponse, Long> {
 
     Optional<AdvertisementResponse> findByIdAndSeller_Id(Long id, Long sellerId);
-
+    Optional<AdvertisementResponse> findByIdAndAdvertisement_Id(Long id, Long advertisementId);
     List<AdvertisementResponse> findAllBySeller_Id(Long sellerId);
     List<AdvertisementResponse> findAllByAdvertisement_IdAndSeller_Id(Long advertisementId, Long sellerId);
 

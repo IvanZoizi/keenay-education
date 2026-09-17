@@ -43,7 +43,7 @@ public class AdvertisementResponseControllerImpl implements AdvertisementRespons
     }
 
     @GetMapping("/created/{id}")
-    @PreAuthorize("hasAuthority('ROLE_seller')")
+    @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<List<AdvertisementResponseDTO>> getResponses(
             @AuthenticationPrincipal CustomUserDetail userDetail,
             @PathVariable("id") Long id

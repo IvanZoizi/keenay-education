@@ -12,6 +12,7 @@ import org.mapstruct.Mappings;
 public interface AdvertisementResponseMapping {
     @Mappings({
             @Mapping(source = "advertisementResponse.id", target="id"),
+            @Mapping(source = "advertisementResponse.seller.id", target = "sellerId"),
             @Mapping(source = "advertisementResponse.price", target = "price"),
             @Mapping(source = "advertisementResponse.comment", target = "comment"),
             @Mapping(source = "advertisementResponse.status", target = "status"),
