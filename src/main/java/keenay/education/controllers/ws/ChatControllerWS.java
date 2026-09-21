@@ -5,6 +5,7 @@ import keenay.education.service.ChatService;
 import keenay.education.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,9 +19,10 @@ import java.security.Principal;
 public class ChatControllerWS {
     private final MessageService messageService;
 
-    @MessageMapping("chat")
-    public void processMessage(@Payload ChatMessageBodyDTO chatMessageBodyDTO,
+    @MessageMapping("chat/{chatId}")
+    public void processMessage(@DestinationVariable Long chatId,
+                               @Payload ChatMessageBodyDTO chatMessageBodyDTO,
                                Principal principal) {
-        messageService.newMessage(chatMessageBodyDTO, principal);
+        messageService.newMessage(chatId, chatMessageBodyDTO, principal);
     }
 }

@@ -49,14 +49,14 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void newMessage(ChatMessageBodyDTO chatMessageBodyDTO, Principal principal)  {
-        Chat chat = chatRepository.findById(chatMessageBodyDTO.getChatId())
+    public void newMessage(Long chatId, ChatMessageBodyDTO chatMessageBodyDTO, Principal principal)  {
+        Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new ChatNotFoundException("Chat is not found."));
         Users user = userRepository.findByEmail(principal.getName()).
                 orElseThrow(() -> new UserIsNotFoundException("User is not found"));
         Messages message = create(chat, chatMessageBodyDTO, user);
         messagingTemplate.convertAndSend(
-                "/topic/chats/" + chat.getId(),
+                "/queue/chats/" + chatId,
                 chatMapper.getDTO(message)
         );
     }

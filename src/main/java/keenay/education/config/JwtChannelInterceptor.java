@@ -1,12 +1,13 @@
 package keenay.education.config;
 
-import keenay.education.security.CustomUserDetail;
+import io.jsonwebtoken.JwtException;
 import keenay.education.security.jwt.JwtService;
 import keenay.education.service.impl.CustomUserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
@@ -15,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,35 +23,58 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JwtChannelInterceptor implements ChannelInterceptor {
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
     private final CustomUserServiceImpl customUserService;
+    private final WsSessionRegistry sessionRegistry;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-            String authHeader = accessor.getFirstNativeHeader("Authorization");
+        if (accessor == null || accessor.getCommand() == null) {
+            return message;
+        }
 
-            if (authHeader == null || authHeader.isBlank()) {
-                throw new AuthenticationCredentialsNotFoundException("Missing Authorization header on CONNECT");
-            }
+        StompCommand command = accessor.getCommand();
 
-            try {
-                String token = jwtService.getJwtToken(authHeader);
-                String login = jwtService.getLoginFromToken(token);
+        if (StompCommand.CONNECT.equals(command)) {
+            handleConnect(accessor);
+            return message;
+        }
 
-                UserDetails userDetails = customUserService.getUserByEmail(login);
-                Authentication auth = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-
-                accessor.setUser(auth);
-            } catch (IllegalArgumentException ex) {
-                log.warn("WS auth failed: {}", ex.getMessage());
-                throw new AuthenticationCredentialsNotFoundException("Invalid or expired token");
+        if (StompCommand.SUBSCRIBE.equals(command) || StompCommand.SEND.equals(command)) {
+            if (accessor.getUser() == null) {
+                throw new AuthenticationCredentialsNotFoundException("Unauthorized");
             }
         }
 
         return message;
+    }
+
+    private void handleConnect(StompHeaderAccessor accessor) {
+        String authHeader = accessor.getFirstNativeHeader("Authorization");
+
+        if (authHeader == null || authHeader.isBlank()) {
+            throw new AuthenticationCredentialsNotFoundException("Missing Authorization header on CONNECT");
+        }
+
+        Authentication auth;
+        try {
+            String token = jwtService.getJwtToken(authHeader);
+            String login = jwtService.getLoginFromToken(token);
+
+            UserDetails userDetails = customUserService.getUserByEmail(login);
+            auth = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+        } catch (IllegalArgumentException | JwtException ex) {
+            log.warn("WS auth failed: {}", ex.getMessage());
+            throw new AuthenticationCredentialsNotFoundException("Invalid or expired token");
+        }
+
+        if (!sessionRegistry.tryRegister(auth.getName(), accessor.getSessionId())) {
+            log.warn("WS connection rejected, user already connected: {}", auth.getName());
+            throw new MessageDeliveryException("Already connected from another session");
+        }
+
+        accessor.setUser(auth);
     }
 }

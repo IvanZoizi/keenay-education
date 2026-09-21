@@ -22,10 +22,12 @@ services:
       - RABBITMQ_DEFAULT_PASS=admin
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./enabled_plugins:/etc/rabbitmq/enabled_plugins
     restart: unless-stopped
     ports:
       - "5672:5672"
       - "15672:15672"
+      - "61613:61613"
     networks:
       - app-network
 
