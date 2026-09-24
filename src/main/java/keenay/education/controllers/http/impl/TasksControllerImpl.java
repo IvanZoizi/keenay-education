@@ -37,7 +37,7 @@ public class TasksControllerImpl implements TaskController {
     }
 
     @Override
-    @GetMapping("/")
+    @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_customer')")
     public ResponseEntity<TaskDTO> getTask(
             @AuthenticationPrincipal CustomUserDetail customUserDetail,
